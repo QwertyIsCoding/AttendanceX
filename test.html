@@ -20,13 +20,13 @@
         maxPredictions = model.getTotalClasses();
 
         // webcam
-        const flip = true; // whether to flip the webcam
-        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-        await webcam.setup(); // request access to the webcam
+        const flip = true; // want to flip?
+        webcam = new tmImage.Webcam(200, 200, flip); 
+        await webcam.setup(); // promp webcam access
         await webcam.play();
         window.requestAnimationFrame(loop);
 
-        // append elements to the DOM
+        // append elements to the page
         document.getElementById("webcam-container").appendChild(webcam.canvas);
         labelContainer = document.getElementById("label-container");
         for (let i = 0; i < maxPredictions; i++) { // and class labels
@@ -62,12 +62,14 @@
             // stack
             var firstname = document.getElementById("constantData").innerHTML = prediction[i].className;
             var entry = document.createElement('li');
-            entry.appendChild(document.createTextNode(firstname));
-            list.appendChild(entry);
+            if (prediction[i].probability.toFixed(2) > 0.9) {
+                entry.appendChild(document.createTextNode(firstname));
+                list.appendChild(entry);
+            }
         }
     }
 
-    // attempt at making data easier to read
+// attempt at making data easier to read
 </script>
 <div id="constantData">
     What am I looking at:
