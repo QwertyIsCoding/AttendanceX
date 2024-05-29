@@ -5,8 +5,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script type="text/javascript">
-    // More API functions here:
-    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
     // figurine model
     const URL = "https://teachablemachine.withgoogle.com/models/zU39V0gco/";
@@ -48,9 +46,9 @@
         const prediction = await model.predict(webcam.canvas);
         for (let i = 0; i < maxPredictions; i++) {
             const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                prediction[i].className + ": " + prediction[i].probability.toFixed(1);
             labelContainer.childNodes[i].innerHTML = classPrediction;
-            if (prediction[i].probability.toFixed() > 0.9) {
+            if (prediction[i].probability.toFixed(2) > 0.9) {
                 document.getElementById("constantData").innerHTML = prediction[i].className;
             }
             else {
@@ -59,9 +57,19 @@
             constantData.appendChild(document.createElement("div"));
             data[i] = prediction[i].className;
             var myList = document.getElementById("myList");
+            var list = document.getElementById('demo');
+
+            // stack
+            var firstname = document.getElementById("constantData").innerHTML = prediction[i].className;
+            var entry = document.createElement('li');
+            entry.appendChild(document.createTextNode(firstname));
+            list.appendChild(entry);
         }
     }
+
+    // attempt at making data easier to read
 </script>
-<div id = "constantData">
-    What am I looking at: 
+<div id="constantData">
+    What am I looking at:
 </div>
+<ol id="demo"></ol>
