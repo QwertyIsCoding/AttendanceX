@@ -18,15 +18,15 @@
     var listStudents = ["student1", "student2"];
 
     // timeout feature?
-    var keepCalling = true;
+    // var keepCalling = true;
 
-    setTimeout(function () {
-        keepCalling = false;
-    }, 60000);
+    // setTimeout(function () {
+    //     keepCalling = false;
+    // }, 60000);
 
-    while (keepCalling) {
-        predict();
-    }
+    // while (keepCalling) {
+    //     predict();
+    // }
 
     // Load the image model and setup the webcam
     async function init() {
@@ -92,7 +92,7 @@
 <div id="constantData">
     What am I looking at:
 </div>
-<div id="presentStudents">
+<div id="presentStudents"> <!--this does not seem to be working-->
     Students I found:
 </div>
 <div id="absentStudents"></div>
