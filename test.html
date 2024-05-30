@@ -1,5 +1,8 @@
 <div>Teachable Machine Image Model</div>
 <button type="button" onclick="init()">Start</button>
+<div id="breakSite">
+    <button>Break</button>
+</div>
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -29,6 +32,12 @@
     // }
 
     // Load the image model and setup the webcam
+
+    // break button
+    async function breakCode() {
+        
+    }
+
     async function init() {
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
@@ -95,5 +104,7 @@
 <div id="presentStudents"> <!--this does not seem to be working-->
     Students I found:
 </div>
-<div id="absentStudents"></div>
+<div id="absentStudents">
+    Students who are absent:
+</div>
 <ol id="demo"></ol>
