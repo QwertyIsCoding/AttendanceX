@@ -8,8 +8,25 @@
 
     // figurine model
     const URL = "https://teachablemachine.withgoogle.com/models/zU39V0gco/";
+    // train for student, and train for null
 
     let model, webcam, labelContainer, maxPredictions;
+
+    // data set
+    var listPresent = [];
+    var listAbsent = [];
+    var listStudents = ["student1", "student2"];
+
+    // timeout feature?
+    var keepCalling = true;
+
+    setTimeout(function () {
+        keepCalling = false;
+    }, 60000);
+
+    while (keepCalling) {
+        predict();
+    }
 
     // Load the image model and setup the webcam
     async function init() {
@@ -21,7 +38,7 @@
 
         // webcam
         const flip = true; // want to flip?
-        webcam = new tmImage.Webcam(200, 200, flip); 
+        webcam = new tmImage.Webcam(200, 200, flip);
         await webcam.setup(); // promp webcam access
         await webcam.play();
         window.requestAnimationFrame(loop);
@@ -62,16 +79,21 @@
             // stack
             var firstname = document.getElementById("constantData").innerHTML = prediction[i].className;
             var entry = document.createElement('li');
-            if (prediction[i].probability.toFixed(2) > 0.9) {
+            if (prediction[i].probability.toFixed(2) > 0.9) { // parameter toFixed(x) --> significance?
                 entry.appendChild(document.createTextNode(firstname));
                 list.appendChild(entry);
             }
+
         }
     }
 
-// attempt at making data easier to read
+    // attempt at making data easier to read
 </script>
 <div id="constantData">
     What am I looking at:
 </div>
+<div id="presentStudents">
+    Students I found:
+</div>
+<div id="absentStudents"></div>
 <ol id="demo"></ol>
