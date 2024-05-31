@@ -1,8 +1,6 @@
-<div>Teachable Machine Image Model</div>
+<div>Attendance Machine (a demo)- Pranav Somalinga</div>
 <button type="button" onclick="init()">Start</button>
-<div id="breakSite">
-    <button>Break</button>
-</div>
+<button type="button" onclick="breakCode()">Break Code</button>
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -33,9 +31,11 @@
 
     // Load the image model and setup the webcam
 
-    // break button
+    // break button -- stop code execution 
     async function breakCode() {
-        
+        document.removeEventListener("DOMContentLoaded", function () { }, false);
+        document.removeEventListener("load", function () { }, false);
+        document.write("");
     }
 
     async function init() {
@@ -60,10 +60,15 @@
         }
     }
 
+    async function backgroundTimer() {
+        setInterval(predict, 1000000000);
+    }
+
     async function loop() {
         webcam.update(); // update the webcam frame
         await predict();
         window.requestAnimationFrame(loop);
+        
     }
 
     // run the webcam image through the image model
