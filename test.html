@@ -9,7 +9,6 @@
 
     // figurine model
     const URL = "https://teachablemachine.withgoogle.com/models/zU39V0gco/";
-    // train for student, and train for null
 
     let model, webcam, labelContainer, maxPredictions;
 
@@ -18,19 +17,6 @@
     var listAbsent = [];
     var listStudents = ["student1", "student2"];
 
-    // timeout feature?
-    // var keepCalling = true;
-
-    // setTimeout(function () {
-    //     keepCalling = false;
-    // }, 60000);
-
-    // while (keepCalling) {
-    //     predict();
-    // }
-
-    // Load the image model and setup the webcam
-
     // break button -- stop code execution 
     async function breakCode() {
         document.removeEventListener("DOMContentLoaded", function () { }, false);
@@ -38,6 +24,7 @@
         document.write("");
     }
 
+    // Load the image model and setup the webcam
     async function init() {
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
@@ -60,15 +47,17 @@
         }
     }
 
+    // currently does not do anythhing
     async function backgroundTimer() {
         setInterval(predict, 1000000000);
     }
 
+    // looping -- keep track 
     async function loop() {
         webcam.update(); // update the webcam frame
         await predict();
         window.requestAnimationFrame(loop);
-        
+
     }
 
     // run the webcam image through the image model
@@ -100,9 +89,9 @@
 
         }
     }
-
-    // attempt at making data easier to read
 </script>
+
+<!--attemping to make the data easier to read-->
 <div id="constantData">
     What am I looking at:
 </div>
