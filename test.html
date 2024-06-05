@@ -2,7 +2,8 @@
 <button type="button" onclick="init()">Start</button>
 <button type="button" onclick="breakCode()">Break Code</button>
 <!-- HTML Button -->
-<button id="showArrayBtn" onclick="showArray()">Show Array</button>
+<button id="showArrayBtn" onclick="showArray()">Show Present</button>
+<button id="showMissingBtn" onclick="showAbsent()">Show Absent</button>
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -65,16 +66,30 @@
 
     // show present
     var myArray = [];
-   
-   // showArrayBtn.addEventListener("click", showArray);
+    var present = [];
     function showArray() {
         document.body.innerHTML = "";
         for (let i = 0; i < myArray.length; i++) {
-            const newElement = document.createElement("p");
-            newElement.textContent = myArray[i];
-            document.body.appendChild(newElement);
+            if ((myArray[i]) != "Empty") {
+                const newElement = document.createElement("p");
+                newElement.textContent = myArray[i];
+                present[i] = myArray[i];
+                document.body.appendChild(newElement);
+            }
         }
     }
+
+    
+    /* WORK ON THIS TOMORROW
+    function showAbsent() {
+        document.body.innetHTML = "";
+        for (let i = 0; i < present.length; i++) {
+            for (let j = 0; j < myArray.length; j++) {
+                if (myArray[i] )
+            }
+        }
+    }
+    */
 
     // run the webcam image through the image model
     async function predict() {
