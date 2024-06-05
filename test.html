@@ -1,6 +1,6 @@
-<div>Attendance Machine (a demo)- Pranav Somalinga</div>
+<div>Attendance Machine (a proof of concept) - Pranav Somalinga</div>
 <button type="button" onclick="init()">Start</button>
-<button type="button" onclick="breakCode()">Break Code</button>
+<button type="button" onclick="breakCode()">Break</button>
 <!-- HTML Button -->
 <button id="showArrayBtn" onclick="showArray()">Show Attendance</button>
 <!-- <button id="showMissingBtn" onclick="showAbsent()">Show Absent</button> -->
@@ -23,6 +23,7 @@
 
     // break button -- stop code execution 
     async function breakCode() {
+        // break camera too?    
         document.removeEventListener("DOMContentLoaded", function () { }, false);
         document.removeEventListener("load", function () { }, false);
         document.write("");
