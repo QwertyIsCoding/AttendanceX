@@ -1,6 +1,8 @@
 <div>Attendance Machine (a demo)- Pranav Somalinga</div>
 <button type="button" onclick="init()">Start</button>
 <button type="button" onclick="breakCode()">Break Code</button>
+<!-- HTML Button -->
+<button id="showArrayBtn" onclick="showArray()">Show Array</button>
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -8,14 +10,15 @@
 <script type="text/javascript">
 
     // figurine model
-    const URL = "https://teachablemachine.withgoogle.com/models/zU39V0gco/";
+    const URL = "https://teachablemachine.withgoogle.com/models/M28B_0nhQ/";
+    // https://teachablemachine.withgoogle.com/models/M28B_0nhQ/
 
     let model, webcam, labelContainer, maxPredictions;
 
     // data set
     var listPresent = [];
     var listAbsent = [];
-    var listStudents = ["student1", "student2"];
+    var listStudents = ["Shifu", "WallE", "Mantis"];
 
     // break button -- stop code execution 
     async function breakCode() {
@@ -60,8 +63,20 @@
 
     }
 
+    // show present
+    var myArray = [];
+   
+   // showArrayBtn.addEventListener("click", showArray);
+    function showArray() {
+        document.body.innerHTML = "";
+        for (let i = 0; i < myArray.length; i++) {
+            const newElement = document.createElement("p");
+            newElement.textContent = myArray[i];
+            document.body.appendChild(newElement);
+        }
+    }
+
     // run the webcam image through the image model
-    var data = [];
     async function predict() {
         const prediction = await model.predict(webcam.canvas);
         for (let i = 0; i < maxPredictions; i++) {
@@ -70,12 +85,12 @@
             labelContainer.childNodes[i].innerHTML = classPrediction;
             if (prediction[i].probability.toFixed(2) > 0.9) {
                 document.getElementById("constantData").innerHTML = prediction[i].className;
+                myArray[i] = prediction[i].className;
             }
             else {
                 document.getElementById("constantData").innerHTML = "I AM CONFUSED";
             }
             constantData.appendChild(document.createElement("div"));
-            data[i] = prediction[i].className;
             var myList = document.getElementById("myList");
             var list = document.getElementById('demo');
 
@@ -97,8 +112,5 @@
 </div>
 <div id="presentStudents"> <!--this does not seem to be working-->
     Students I found:
-</div>
-<div id="absentStudents">
-    Students who are absent:
 </div>
 <ol id="demo"></ol>
