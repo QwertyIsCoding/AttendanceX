@@ -2,8 +2,8 @@
 <button type="button" onclick="init()">Start</button>
 <button type="button" onclick="breakCode()">Break Code</button>
 <!-- HTML Button -->
-<button id="showArrayBtn" onclick="showArray()">Show Present</button>
-<button id="showMissingBtn" onclick="showAbsent()">Show Absent</button>
+<button id="showArrayBtn" onclick="showArray()">Show Attendance</button>
+<!-- <button id="showMissingBtn" onclick="showAbsent()">Show Absent</button> -->
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -67,6 +67,8 @@
     // show present
     var myArray = [];
     var present = [];
+    var indexes = [];
+    var index = 0;
     function showArray() {
         document.body.innerHTML = "";
         for (let i = 0; i < myArray.length; i++) {
@@ -74,22 +76,21 @@
                 const newElement = document.createElement("p");
                 newElement.textContent = myArray[i];
                 present[i] = myArray[i];
+                indexes[index] = i;
+                index++;
                 document.body.appendChild(newElement);
             }
         }
-    }
-
-    
-    /* WORK ON THIS TOMORROW
-    function showAbsent() {
-        document.body.innetHTML = "";
-        for (let i = 0; i < present.length; i++) {
-            for (let j = 0; j < myArray.length; j++) {
-                if (myArray[i] )
-            }
+        
+        for (let i = 0; i < indexes.length; i++) {
+            myArray.splice(indexes[i], 1);
+        }
+        for (let i = 0; i < myArray.length; i++) {
+            const nextElement = document.createElement("a");
+            nextElement.textContent = myArray[i];
+            document.body.appendChild(nextElement);
         }
     }
-    */
 
     // run the webcam image through the image model
     async function predict() {
@@ -122,6 +123,22 @@
 </script>
 
 <!--attemping to make the data easier to read-->
+<p> Enter the file content:- </p>
+   <textarea> </textarea>
+   <br/>
+   <button onclick = "downloadFile()"> save File </button>
+   <script>
+      const downloadFile = () => {
+         const link = document.createElement("a");
+         const content = document.querySelector("textarea").value;
+         const file = new Blob([content], { type: 'text/plain' });
+         link.href = URL.createObjectURL(file);
+         link.download = "sample.txt";
+         link.click();
+         URL.revokeObjectURL(link.href);
+      };
+   </script>
+<br><br>
 <div id="constantData">
     What am I looking at:
 </div>
