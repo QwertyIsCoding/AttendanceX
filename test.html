@@ -2,8 +2,8 @@
 <button type="button" onclick="init()">Start</button>
 <button type="button" onclick="breakCode()">Break</button>
 <!-- HTML Button -->
-<button id="showArrayBtn" onclick="showArray()">Show Attendance</button>
-<!-- <button id="showMissingBtn" onclick="showAbsent()">Show Absent</button> -->
+<button id="showArrayBtn" onclick="showArray()">Show Present</button>
+<button id="showMissingBtn" onclick="showAbsent()">Show Absent</button>
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -17,9 +17,9 @@
     let model, webcam, labelContainer, maxPredictions;
 
     // data set
-    var listPresent = [];
+    var listPresent = ["Null"];
     var listAbsent = [];
-    var listStudents = ["Shifu", "WallE", "Mantis"];
+    var listStudents = ["Shifu", "WallE", "Mantis", "Po"];
 
     // break button -- stop code execution 
     async function breakCode() {
@@ -52,11 +52,6 @@
         }
     }
 
-    // currently does not do anythhing
-    async function backgroundTimer() {
-        setInterval(predict, 1000000000);
-    }
-
     // looping -- keep track 
     async function loop() {
         webcam.update(); // update the webcam frame
@@ -71,25 +66,27 @@
     var indexes = [];
     var index = 0;
     function showArray() {
-        document.body.innerHTML = "";
+        document.body.innerHTML = ""; // needed
         for (let i = 0; i < myArray.length; i++) {
             if ((myArray[i]) != "Empty") {
-                const newElement = document.createElement("p");
-                newElement.textContent = myArray[i];
-                present[i] = myArray[i];
+                const newElement = document.createElement("p"); // needed
+                newElement.textContent = myArray[i]; // needed
+                //  present[i] = myArray[i];
                 indexes[index] = i;
                 index++;
-                document.body.appendChild(newElement);
+                document.body.appendChild(newElement); // needed
             }
         }
-        
-        for (let i = 0; i < indexes.length; i++) {
-            myArray.splice(indexes[i], 1);
-        }
-        for (let i = 0; i < myArray.length; i++) {
-            const nextElement = document.createElement("a");
-            nextElement.textContent = myArray[i];
-            document.body.appendChild(nextElement);
+    }
+
+    function showAbsent() {
+        document.body.innerHTML = "";
+        for (let i = 0; i < listStudents.length; i++) {
+            if (present.indexOf(listStudents[i]) == -1) {
+                const nextElement = document.createElement("p"); // try changing between a and p 
+                nextElement.textContent = listStudents[i];
+                document.body.appendChild(nextElement);
+            }
         }
     }
 
@@ -103,6 +100,8 @@
             if (prediction[i].probability.toFixed(2) > 0.9) {
                 document.getElementById("constantData").innerHTML = prediction[i].className;
                 myArray[i] = prediction[i].className;
+                // add present array data here?
+                present[i] = prediction[i].className;
             }
             else {
                 document.getElementById("constantData").innerHTML = "I AM CONFUSED";
@@ -125,20 +124,20 @@
 
 <!--attemping to make the data easier to read-->
 <p> Enter the file content:- </p>
-   <textarea> </textarea>
-   <br/>
-   <button onclick = "downloadFile()"> save File </button>
-   <script>
-      const downloadFile = () => {
-         const link = document.createElement("a");
-         const content = document.querySelector("textarea").value;
-         const file = new Blob([content], { type: 'text/plain' });
-         link.href = URL.createObjectURL(file);
-         link.download = "sample.txt";
-         link.click();
-         URL.revokeObjectURL(link.href);
-      };
-   </script>
+<textarea> </textarea>
+<br />
+<button onclick="downloadFile()"> save File </button>
+<script>
+    const downloadFile = () => {
+        const link = document.createElement("a");
+        const content = document.querySelector("textarea").value;
+        const file = new Blob([content], { type: 'text/plain' });
+        link.href = URL.createObjectURL(file);
+        link.download = "sample.txt";
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
+</script>
 <br><br>
 <div id="constantData">
     What am I looking at:
