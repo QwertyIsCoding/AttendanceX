@@ -1,9 +1,12 @@
 <div>Attendance Machine (a proof of concept) - Pranav Somalinga</div>
+<br>
 <button type="button" onclick="init()">Start</button>
 <button type="button" onclick="breakCode()">Break</button>
+<button type="button" onclick="refresh()">Refresh</button>
 <!-- HTML Button -->
 <button id="showArrayBtn" onclick="showArray()">Show Present</button>
 <button id="showMissingBtn" onclick="showAbsent()">Show Absent</button>
+<br>
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -27,6 +30,10 @@
         document.removeEventListener("DOMContentLoaded", function () { }, false);
         document.removeEventListener("load", function () { }, false);
         document.write("");
+    }
+
+    async function refresh() {
+        window.location.reload();
     }
 
     // Load the image model and setup the webcam
@@ -123,20 +130,42 @@
 </script>
 
 <!--attemping to make the data easier to read-->
-<p> Enter the file content:- </p>
-<textarea> </textarea>
+<br>
+<textarea id="textArea">
+ </textarea>
+
 <br />
 <button onclick="downloadFile()"> save File </button>
 <script>
-    const downloadFile = () => {
-        const link = document.createElement("a");
-        const content = document.querySelector("textarea").value;
-        const file = new Blob([content], { type: 'text/plain' });
-        link.href = URL.createObjectURL(file);
-        link.download = "sample.txt";
-        link.click();
-        URL.revokeObjectURL(link.href);
-    };
+    function downloadFile() {
+        var textToWrite = document.getElementById('textArea').innerHTML;
+        var textFileAsBlob = new Blob([textToWrite], { type: 'text/plain' });
+        var fileNameToSaveAs = "file.txt"; //filename.extension
+
+        var downloadLink = document.createElement("a");
+        downloadLink.download = fileNameToSaveAs;
+        downloadLink.innerHTML = "Download File";
+        if (window.webkitURL != null) {
+            // Chrome allows the link to be clicked without actually adding it to the DOM.
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+        } else {
+            // Firefox requires the link to be added to the DOM before it can be clicked.
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+            downloadLink.onclick = destroyClickedElement;
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+        }
+
+        downloadLink.click();
+        var button = document.getElementById('save');
+        button.addEventListener('click', saveTextAsFile);
+
+        function destroyClickedElement(event) {
+            // remove the link from the DOM
+            document.body.removeChild(event.target);
+        }
+    }
+
 </script>
 <br><br>
 <div id="constantData">
