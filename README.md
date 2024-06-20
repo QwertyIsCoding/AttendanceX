@@ -1,1 +1,3 @@
-![attendance-x](https://github.com/QwertyIsCoding/AttendanceX/assets/77963043/65e052d6-70f8-453e-a4de-95f685c50ada)
+<p align="center">
+  <img src="[https://github.com/waldyr/Sublime-Installer/blob/master/sublime_text.png?raw=true](https://github.com/QwertyIsCoding/AttendanceX/blob/main/Assets/attendance-x.png?raw=true)" alt="A new way to take roll in class"/>
+</p>
