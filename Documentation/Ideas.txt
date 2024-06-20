@@ -1,0 +1,6 @@
+1. Get the domain .js.org from https://js.org/
+2. Add a back button -- not sure how to keep track of data that way though
+3. Be able to upload user models -- so would that run locally or with the cloud?
+4. Keep capera off till a certain button is pressed, then which the camera will turn on and take attendance
+4. Add a settings page
+5. HOW TO SAVE DATA? LOCAL? CLOUD? AUTH?
