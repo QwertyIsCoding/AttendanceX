@@ -1,5 +1,5 @@
 // figurine model
- const URL = "https://teachablemachine.withgoogle.com/models/M28B_0nhQ/";
+const URL = "https://teachablemachine.withgoogle.com/models/M28B_0nhQ/";
 // https://teachablemachine.withgoogle.com/models/M28B_0nhQ/
 
 //attempting to load model locally
@@ -98,7 +98,7 @@ async function predict() {
     labelContainer.childNodes[i].innerHTML = classPrediction;
     if (prediction[i].probability.toFixed(2) > 0.9) {
       document.getElementById("constantData").innerHTML =
-        prediction[i].className;
+        prediction[i].className + ": " + prediction[i].probability.toFixed(2);
       myArray[i] = prediction[i].className;
       // add present array data here?
       present[i] = prediction[i].className;
@@ -115,7 +115,9 @@ async function predict() {
     var entry = document.createElement("li");
     if (prediction[i].probability.toFixed(2) > 0.9) {
       // parameter toFixed(x) --> significance?
-      entry.appendChild(document.createTextNode(firstname));
+      entry.appendChild(document.createTextNode(firstname)) +
+        ": " +
+        prediction[i].probability.toFixed(2);
       list.appendChild(entry);
     }
   }
