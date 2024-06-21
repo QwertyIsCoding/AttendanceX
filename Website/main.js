@@ -52,6 +52,50 @@ async function init() {
   }
 }
 
+// Function to stop the webcam and unload the model
+async function stopModel() {
+  // Stop the webcam
+  if (webcam) {
+    webcam.stop();
+    const webcamContainer = document.getElementById("webcam-container");
+    if (webcamContainer && webcam.canvas) {
+      webcamContainer.removeChild(webcam.canvas);
+    }
+    webcam = null;
+  }
+
+  // Unload the model
+  if (model) {
+    // Note: Teachable Machine's library doesn't have a built-in unload method
+    // So we'll just set it to null to allow garbage collection
+    model = null;
+  }
+
+  // Clear the label container
+  if (labelContainer) {
+    labelContainer.innerHTML = '';
+  }
+
+  // Stop the animation loop
+  if (window.cancelAnimationFrame) {
+    window.cancelAnimationFrame(animationFrame);
+  }
+
+  maxPredictions = 0;
+}
+
+// Variable to store the animation frame ID
+let animationFrame;
+
+// Modified loop function to store the animation frame ID
+function loop() {
+  // Your existing loop code here
+  // ...
+
+  // Store the animation frame ID
+  animationFrame = window.requestAnimationFrame(loop);
+}
+
 // looping -- keep track
 async function loop() {
   webcam.update(); // update the webcam frame
