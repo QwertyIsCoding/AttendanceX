@@ -1,0 +1,4 @@
+1. Create login and data management
+2. Stats page for end user
+3. Automatic tardy
+4. Manual attendance override
