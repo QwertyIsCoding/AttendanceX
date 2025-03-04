@@ -126,6 +126,31 @@ async function stopModel() {
   maxPredictions = 0;
 }
 
+// Sign up function
+async function signUp() {
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('User signed up:', userCredential.user);
+  } catch (error) {
+    console.error('Error signing up:', error);
+  }
+}
+
+// Log in function
+async function logIn() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('User logged in:', userCredential.user);
+  } catch (error) {
+    console.error('Error logging in:', error);
+  }
+}
+
+
 // Variable to store the animation frame ID
 let animationFrame;
 
