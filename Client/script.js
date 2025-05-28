@@ -1,6 +1,6 @@
 // firebase configuration
 const firebaseConfig = {
-  // has been removed
+  // has been removed in the public repository for security reasons
 };
 
 // figurine model
