@@ -1,12 +1,6 @@
 // firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDmuniK3qPkWT64UfPcUnerR2TnBTqoxo0",
-  authDomain: "attendance-4bfda.firebaseapp.com",
-  projectId: "attendance-4bfda",
-  storageBucket: "attendance-4bfda.firebasestorage.app",
-  messagingSenderId: "984620523158",
-  appId: "1:984620523158:web:1cecf2e6af63f06212acb7",
-  measurementId: "G-BVBTVTJE36"
+  // has been removed
 };
 
 // figurine model
