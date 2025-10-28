@@ -1,314 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AttendanceX - Machine Learning-Based Attendance Tracking System">
-  <meta name="author" content="Pranav Somalinga">
-  <title>AttendanceX - ML Attendance Tracker</title>
+<div>Attendance Machine (a proof of concept) - Pranav Somalinga</div>
+<br />
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<script src="script.js"></script>
+<script src="textbox.js"></script>
+<script src="logging.js"></script>
 
-  <!-- External Dependencies -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<!-- Sign Up Form -->
+<div>
+  <h2>Sign Up</h2>
+  <input type="email" id="signup-email" placeholder="Email" />
+  <input type="password" id="signup-password" placeholder="Password" />
+  <button type="button" onclick="signUp()">Sign Up</button>
+</div>
 
-  <!-- Application Scripts -->
-  <script src="script.js" defer></script>
-  <script src="textbox.js" defer></script>
-  <script src="logging.js" defer></script>
+<!-- Log In Form -->
+<div>
+  <h2>Log In</h2>
+  <input type="email" id="login-email" placeholder="Email" />
+  <input type="password" id="login-password" placeholder="Password" />
+  <button type="button" onclick="logIn()">Log In</button>
+</div>
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css">
-</head>
+<br>
+<br>
 
-<body>
-  <header>
-    <h1>AttendanceX</h1>
-    <p class="subtitle">Machine Learning-Based Attendance Tracking System</p>
-    <p class="author">Created by Pranav Somalinga</p>
-  </header>
+<button type="button" onclick="init()">Start</button>
+<button type="button" onclick="stopModel()">Stop</button>
+<button type="button" onclick="breakCode()">Break</button>
+<button type="button" onclick="refresh()">Refresh</button>
+<button type="button" onclick="saveToCloud()">SaveToFirebase</button>
+<!-- HTML Button -->
+<button id="showArrayBtn" onclick="showArray()">Show Present</button>
+<button id="showMissingBtn" onclick="showAbsent()">Show Absent</button>
+<button id="exportButton">Export</button>
+<button onclick="history.back()">Go Back</button>
+<br />
+<div id="webcam-container"></div>
+<div id="label-container"></div>
 
-  <main>
-    <!-- Authentication Section -->
-    <section id="authentication" class="auth-section">
-      <h2>Authentication</h2>
+<!--attemping to make the data easier to read-->
+<br />
+<textarea id="textArea"> </textarea>
 
-      <!-- Sign Up Form -->
-      <div class="auth-form">
-        <h3>Sign Up</h3>
-        <form id="signup-form" onsubmit="event.preventDefault(); signUp();">
-          <div class="form-group">
-            <label for="signup-email">Email Address:</label>
-            <input
-              type="email"
-              id="signup-email"
-              name="email"
-              placeholder="Enter your email"
-              required
-              aria-describedby="signup-email-help"
-            />
-            <small id="signup-email-help">We'll use this to create your account</small>
-          </div>
+<script>
+  function myFunction() {
+    var x = document.createElement("BUTTON");
+    var t = document.createTextNode("Click me");
+    x.appendChild(t);
+    document.body.appendChild(x);
+  }
+</script>
 
-          <div class="form-group">
-            <label for="signup-password">Password:</label>
-            <input
-              type="password"
-              id="signup-password"
-              name="password"
-              placeholder="Create a password"
-              required
-              minlength="6"
-              aria-describedby="signup-password-help"
-            />
-            <small id="signup-password-help">Minimum 6 characters</small>
-          </div>
+<br />
+<button onclick="downloadFile()">save File</button>
+<script></script>
+<br /><br />
+<div id="constantData">What am I looking at:</div>
 
-          <button type="submit" class="btn btn-primary">Sign Up</button>
-        </form>
-      </div>
-
-      <!-- Log In Form -->
-      <div class="auth-form">
-        <h3>Log In</h3>
-        <form id="login-form" onsubmit="event.preventDefault(); logIn();">
-          <div class="form-group">
-            <label for="login-email">Email Address:</label>
-            <input
-              type="email"
-              id="login-email"
-              name="email"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="login-password">Password:</label>
-            <input
-              type="password"
-              id="login-password"
-              name="password"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-
-          <button type="submit" class="btn btn-secondary">Log In</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- Control Panel -->
-    <section id="controls" class="control-section">
-      <h2>Control Panel</h2>
-
-      <div class="control-buttons">
-        <!-- Model Controls -->
-        <div class="button-group">
-          <h3>Model Controls</h3>
-          <button
-            type="button"
-            onclick="init()"
-            class="btn btn-success"
-            id="start-btn"
-            aria-describedby="start-help"
-          >
-            Start Recognition
-          </button>
-          <small id="start-help">Initialize webcam and start student recognition</small>
-
-          <button
-            type="button"
-            onclick="stopModel()"
-            class="btn btn-danger"
-            id="stop-btn"
-            disabled
-            aria-describedby="stop-help"
-          >
-            Stop Recognition
-          </button>
-          <small id="stop-help">Stop webcam and model processing</small>
-        </div>
-
-        <!-- Attendance Controls -->
-        <div class="button-group">
-          <h3>Attendance</h3>
-          <button
-            type="button"
-            onclick="showArray()"
-            class="btn btn-info"
-            id="show-present-btn"
-            aria-describedby="present-help"
-          >
-            Show Present
-          </button>
-          <small id="present-help">Display list of detected students</small>
-
-          <button
-            type="button"
-            onclick="showAbsent()"
-            class="btn btn-warning"
-            id="show-absent-btn"
-            aria-describedby="absent-help"
-          >
-            Show Absent
-          </button>
-          <small id="absent-help">Display list of undetected students</small>
-
-          <button
-            type="button"
-            onclick="saveToCloud()"
-            class="btn btn-primary"
-            id="save-cloud-btn"
-            aria-describedby="save-help"
-          >
-            Save to Cloud
-          </button>
-          <small id="save-help">Upload attendance data to Firebase</small>
-        </div>
-
-        <!-- Data Export -->
-        <div class="button-group">
-          <h3>Data Export</h3>
-          <button
-            type="button"
-            id="exportButton"
-            class="btn btn-secondary"
-            aria-describedby="export-help"
-          >
-            Export Data
-          </button>
-          <small id="export-help">Download prediction data as text file</small>
-
-          <label for="textArea" class="form-label">Custom Text Export:</label>
-          <textarea
-            id="textArea"
-            name="textArea"
-            rows="4"
-            cols="50"
-            placeholder="Enter text to export..."
-            aria-describedby="textarea-help"
-          ></textarea>
-          <small id="textarea-help">Add custom notes or data to export</small>
-
-          <button
-            type="button"
-            onclick="downloadFile()"
-            class="btn btn-secondary"
-            aria-describedby="download-help"
-          >
-            Download File
-          </button>
-          <small id="download-help">Download textarea content as file</small>
-        </div>
-
-        <!-- Utility Controls -->
-        <div class="button-group">
-          <h3>Utilities</h3>
-          <button
-            type="button"
-            onclick="refresh()"
-            class="btn btn-warning"
-            aria-describedby="refresh-help"
-          >
-            Refresh Page
-          </button>
-          <small id="refresh-help">Reload the application</small>
-
-          <button
-            type="button"
-            onclick="breakCode()"
-            class="btn btn-danger"
-            aria-describedby="break-help"
-          >
-            Emergency Stop
-          </button>
-          <small id="break-help">Force stop all processes (use with caution)</small>
-
-          <button
-            type="button"
-            onclick="history.back()"
-            class="btn btn-secondary"
-            aria-describedby="back-help"
-          >
-            Go Back
-          </button>
-          <small id="back-help">Return to previous page</small>
-        </div>
-      </div>
-    </section>
-
-    <!-- Recognition Display -->
-    <section id="recognition" class="recognition-section">
-      <h2>Live Recognition</h2>
-
-      <div class="recognition-container">
-        <!-- Webcam Feed -->
-        <div class="webcam-area">
-          <h3>Camera Feed</h3>
-          <div
-            id="webcam-container"
-            class="webcam-container"
-            role="img"
-            aria-label="Live webcam feed for student recognition"
-          >
-            <p class="placeholder-text">Camera feed will appear here when started</p>
-          </div>
-        </div>
-
-        <!-- Prediction Results -->
-        <div class="predictions-area">
-          <h3>Prediction Results</h3>
-          <div
-            id="label-container"
-            class="label-container"
-            aria-live="polite"
-            aria-label="Real-time prediction results"
-          >
-            <p class="placeholder-text">Predictions will appear here</p>
-          </div>
-
-          <div class="current-detection">
-            <h4>Current Detection:</h4>
-            <div
-              id="constantData"
-              class="constant-data"
-              aria-live="assertive"
-              aria-label="Current high-confidence detection"
-            >
-              Waiting for recognition...
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Attendance Results -->
-    <section id="results" class="results-section">
-      <h2>Attendance Results</h2>
-
-      <div class="results-container">
-        <div class="present-students">
-          <h3>Students Detected</h3>
-          <div id="presentStudents" class="student-list">
-            <p class="placeholder-text">Detected students will appear here</p>
-          </div>
-          <ol id="demo" class="detection-log" aria-label="Detection log with confidence scores">
-            <!-- Dynamic list items will be added here -->
-          </ol>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2024 AttendanceX. Created as an AP Computer Science A project.</p>
-    <p>Built with TensorFlow.js and Teachable Machine</p>
-  </footer>
-
-  <!-- Status Messages (hidden by default) -->
-  <div id="status-messages" class="status-messages" aria-live="polite" aria-atomic="true">
-    <!-- Dynamic status messages will appear here -->
-  </div>
-</body>
-</html>
+<div id="presentStudents">
+  <!--this does not seem to be working-->
+  Students I found:
+</div>
+<ol id="demo"></ol>
