@@ -5,12 +5,7 @@ const firebaseConfig = {
 
 // figurine model
 const URL = "https://teachablemachine.withgoogle.com/models/M28B_0nhQ/";
-// https://teachablemachine.withgoogle.com/models/M28B_0nhQ/
 
-//attempting to load model locally
-// import * as tf from "@tensorflow/tfjs";
-// const MODEL_PATH = "file:///C:/Users/12348/Desktop/AttendanceX/AttendanceX/CodeWeek/converted_edgetpu/model.json";
-// const model = await tf.loadLayersModel(MODEL_PATH);
 
 let model, webcam, labelContainer, maxPredictions;
 
