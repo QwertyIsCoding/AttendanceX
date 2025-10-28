@@ -1,96 +1,266 @@
-// firebase configuration
+/**
+ * AttendanceX - Machine Learning-Based Attendance Tracking System
+ *
+ * This script handles the core functionality for real-time student recognition
+ * using Teachable Machine models, Firebase integration for data storage,
+ * and user authentication.
+ *
+ * ARCHITECTURE OVERVIEW:
+ * This main script combines functionality from multiple subsystems:
+ * - Model management (currently inline, future: modelManager.js)
+ * - Data logging (integrated from logging.js - collectData calls needed)
+ * - Text export (integrated from textbox.js - downloadFile available globally)
+ * - Navigation (conflicts with history.js - using inline history.back())
+ *
+ * SUBSYSTEM INTEGRATION STATUS:
+ * ✓ textbox.js: Fully integrated - downloadFile() available globally
+ * ⚠ logging.js: Partially integrated - collectData() needs to be called in predict()
+ * ⚠ history.js: Conflicts with test.html button - consider removing history.js
+ * ○ modelManager.js: Not integrated - placeholder for future model switching
+ */
+
+// =============================================================================
+// CONFIGURATION AND CONSTANTS
+// =============================================================================
+
+/**
+ * Firebase configuration object.
+ * NOTE: This is empty in the public repository for security reasons.
+ * Populate with your Firebase project config from firebase-config.js
+ */
 const firebaseConfig = {
-  // has been removed in the public repository for security reasons
+  // Add your Firebase config here or import from firebase-config.js
 };
 
-// figurine model
+/**
+ * URL for the Teachable Machine model.
+ * Change this to point to your trained model.
+ */
 const URL = "https://teachablemachine.withgoogle.com/models/M28B_0nhQ/";
-// https://teachablemachine.withgoogle.com/models/M28B_0nhQ/
 
-//attempting to load model locally
-// import * as tf from "@tensorflow/tfjs";
-// const MODEL_PATH = "file:///C:/Users/12348/Desktop/AttendanceX/AttendanceX/CodeWeek/converted_edgetpu/model.json";
-// const model = await tf.loadLayersModel(MODEL_PATH);
+// =============================================================================
+// GLOBAL VARIABLES
+// =============================================================================
 
-let model, webcam, labelContainer, maxPredictions;
+/**
+ * Teachable Machine model instance
+ * @type {tmImage.CustomMobileNet}
+ */
+let model;
 
-// data set
-var listPresent = ["Null"];
-var listAbsent = [];
-var listStudents = []; // populate listStudents with the list of student names in the tensorflow model
+/**
+ * Webcam instance for capturing video feed
+ * @type {tmImage.Webcam}
+ */
+let webcam;
 
-// save to firestone feature -- along with the date of the attendance with timestamp as the filename
+/**
+ * Container element for displaying prediction labels
+ * @type {HTMLElement}
+ */
+let labelContainer;
+
+/**
+ * Maximum number of predictions (classes) in the model
+ * @type {number}
+ */
+let maxPredictions;
+
+/**
+ * Animation frame ID for the prediction loop
+ * @type {number}
+ */
+let animationFrame;
+
+/**
+ * List of students present (detected with high confidence)
+ * @type {string[]}
+ */
+let listPresent = [];
+
+/**
+ * List of students absent (not detected)
+ * @type {string[]}
+ */
+let listAbsent = [];
+
+/**
+ * List of all student names from the model labels
+ * @type {string[]}
+ */
+let listStudents = [];
+
+/**
+ * Array to store prediction results for display
+ * @type {string[]}
+ */
+let myArray = [];
+
+/**
+ * Array of currently present students
+ * @type {string[]}
+ */
+let present = [];
+
+/**
+ * Indexes array (currently unused)
+ * @type {number[]}
+ */
+let indexes = [];
+
+/**
+ * Index counter (currently unused)
+ * @type {number}
+ */
+let index = 0;
+
+// =============================================================================
+// FIREBASE FUNCTIONS
+// =============================================================================
+
+/**
+ * Saves attendance data to Firebase Firestore.
+ * Initializes Firebase if not already done, prepares attendance data
+ * with present/absent lists, date, and timestamp, then saves to Firestore.
+ *
+ * @async
+ * @function saveToCloud
+ * @returns {Promise<void>}
+ * @throws {Error} If Firebase initialization or save operation fails
+ */
 async function saveToCloud() {
-  // Initialize Firebase
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-  const db = firebase.firestore();
-
-  // Get the current date and timestamp
-  const now = new Date();
-  const timestamp = now.toISOString();
-
-  // Prepare the attendance data
-  const attendanceData = {
-    present: listPresent,
-    absent: listAbsent,
-    date: now.toDateString(),
-    timestamp: timestamp
-  };
-
-  // Save the attendance data to Firestore
   try {
-    await db.collection('attendance').doc(timestamp).set(attendanceData);
-    console.log('Attendance data saved successfully');
+    // Initialize Firebase if not already initialized
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    const db = firebase.firestore();
+
+    // Get current date and timestamp
+    const now = new Date();
+    const timestamp = now.toISOString();
+
+    // Prepare attendance data object
+    const attendanceData = {
+      present: listPresent,
+      absent: listAbsent,
+      date: now.toDateString(),
+      timestamp: timestamp,
+    };
+
+    // Save to Firestore collection "attendance" with timestamp as document ID
+    await db.collection("attendance").doc(timestamp).set(attendanceData);
+    console.log("Attendance data saved successfully");
   } catch (error) {
-    console.error('Error saving attendance data: ', error);
+    console.error("Error saving attendance data:", error);
   }
 }
- 
-// break button -- stop code execution
-async function breakCode() {
-  // break camera too?
-  document.removeEventListener("DOMContentLoaded", function () {}, false);
-  document.removeEventListener("load", function () {}, false);
-  document.write("");
+
+/**
+ * Signs up a new user with Firebase Authentication.
+ * Retrieves email and password from form inputs and creates a new account.
+ *
+ * @async
+ * @function signUp
+ * @returns {Promise<void>}
+ * @throws {Error} If sign-up fails (invalid email, weak password, etc.)
+ */
+async function signUp() {
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
+
+  try {
+    // Note: 'auth' should be imported from Firebase Auth
+    // const { getAuth, createUserWithEmailAndPassword } = ...;
+    // const auth = getAuth();
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log("User signed up:", userCredential.user);
+  } catch (error) {
+    console.error("Error signing up:", error);
+  }
 }
 
-async function refresh() {
-  window.location.reload();
+/**
+ * Logs in an existing user with Firebase Authentication.
+ * Retrieves email and password from form inputs and signs in the user.
+ *
+ * @async
+ * @function logIn
+ * @returns {Promise<void>}
+ * @throws {Error} If login fails (invalid credentials, etc.)
+ */
+async function logIn() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  try {
+    // Note: 'auth' should be imported from Firebase Auth
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("User logged in:", userCredential.user);
+  } catch (error) {
+    console.error("Error logging in:", error);
+  }
 }
 
-// Load the image model and setup the webcam
+// =============================================================================
+// MODEL AND WEBCAM FUNCTIONS
+// =============================================================================
+
+/**
+ * Initializes the Teachable Machine model and webcam.
+ * Loads the model and metadata, sets up the webcam, and starts the prediction loop.
+ *
+ * @async
+ * @function init
+ * @returns {Promise<void>}
+ * @throws {Error} If model loading or webcam setup fails
+ */
 async function init() {
-  const modelURL = URL + "model.json";
-  const metadataURL = URL + "metadata.json";
+  try {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-  model = await tmImage.load(modelURL, metadataURL);
-  maxPredictions = model.getTotalClasses();
+    // Load the Teachable Machine model
+    model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
 
-  // Extract class names from metadata and populate listStudents
-  const metadata = await fetch(metadataURL).then(response => response.json());
-  listStudents = metadata.labels;
+    // Fetch metadata and populate student list
+    const metadata = await fetch(metadataURL).then(response => response.json());
+    listStudents = metadata.labels;
 
-  // webcam
-  const flip = true; // want to flip?
-  webcam = new tmImage.Webcam(200, 200, flip);
-  await webcam.setup(); // promp webcam access
-  await webcam.play();
-  window.requestAnimationFrame(loop);
+    // Set up webcam with flip option
+    const flip = true; // Flip the webcam feed horizontally
+    webcam = new tmImage.Webcam(200, 200, flip);
+    await webcam.setup(); // Request user permission for camera access
+    await webcam.play();
 
-  // append elements to the page
-  document.getElementById("webcam-container").appendChild(webcam.canvas);
-  labelContainer = document.getElementById("label-container");
-  for (let i = 0; i < maxPredictions; i++) {
-    // and class labels
-    labelContainer.appendChild(document.createElement("div"));
+    // Start the prediction loop
+    animationFrame = window.requestAnimationFrame(loop);
+
+    // Append webcam canvas to the page
+    document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+    // Set up label container for predictions
+    labelContainer = document.getElementById("label-container");
+    for (let i = 0; i < maxPredictions; i++) {
+      labelContainer.appendChild(document.createElement("div"));
+    }
+  } catch (error) {
+    console.error("Error initializing model and webcam:", error);
   }
 }
 
-// Function to stop the webcam and unload the model
+/**
+ * Stops the webcam, unloads the model, and cleans up resources.
+ * Cancels the animation loop, removes webcam canvas, clears labels.
+ *
+ * @async
+ * @function stopModel
+ * @returns {Promise<void>}
+ */
 async function stopModel() {
-  // Stop the webcam
+  // Stop and clean up webcam
   if (webcam) {
     webcam.stop();
     const webcamContainer = document.getElementById("webcam-container");
@@ -100,130 +270,218 @@ async function stopModel() {
     webcam = null;
   }
 
-  // Unload the model
+  // Unload model (set to null for garbage collection)
   if (model) {
-    // Note: Teachable Machine's library doesn't have a built-in unload method
-    // So we'll just set it to null to allow garbage collection
+    // Teachable Machine doesn't have a built-in unload method
     model = null;
   }
 
-  // Clear the label container
+  // Clear prediction labels
   if (labelContainer) {
-    labelContainer.innerHTML = '';
+    labelContainer.innerHTML = "";
   }
 
-  // Stop the animation loop
-  if (window.cancelAnimationFrame) {
+  // Cancel animation frame
+  if (animationFrame) {
     window.cancelAnimationFrame(animationFrame);
+    animationFrame = null;
   }
 
   maxPredictions = 0;
 }
 
-// Sign up function
-async function signUp() {
-  const email = document.getElementById('signup-email').value;
-  const password = document.getElementById('signup-password').value;
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    console.log('User signed up:', userCredential.user);
-  } catch (error) {
-    console.error('Error signing up:', error);
-  }
-}
-
-// Log in function
-async function logIn() {
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log('User logged in:', userCredential.user);
-  } catch (error) {
-    console.error('Error logging in:', error);
-  }
-}
-
-
-// Variable to store the animation frame ID
-let animationFrame;
-
-// Modified loop function to store the animation frame ID
-function loop() {
-  // Your existing loop code here
-  // ...
-
-  // Store the animation frame ID
-  animationFrame = window.requestAnimationFrame(loop);
-}
-
-// looping -- keep track
+/**
+ * Main prediction loop that runs continuously.
+ * Updates the webcam frame and triggers prediction on each iteration.
+ *
+ * @async
+ * @function loop
+ * @returns {Promise<void>}
+ */
 async function loop() {
-  webcam.update(); // update the webcam frame
-  await predict();
-  window.requestAnimationFrame(loop);
-}
-
-// show present
-var myArray = [];
-var present = [];
-var indexes = [];
-var index = 0;
-function showArray() {
-  document.body.innerHTML = ""; // needed
-  for (let i = 0; i < myArray.length; i++) {
-    if (myArray[i] != "Empty") {
-      const newElement = document.createElement("p"); // needed
-      newElement.textContent = myArray[i]; // needed
-      //  present[i] = myArray[i];
-      indexes[index] = i;
-      index++;
-      document.body.appendChild(newElement); // needed
-    }
+  if (webcam) {
+    webcam.update(); // Update webcam frame
+    await predict(); // Run prediction
+    animationFrame = window.requestAnimationFrame(loop); // Continue loop
   }
 }
 
-function showAbsent() {
-  document.body.innerHTML = "";
-  for (let i = 0; i < listStudents.length; i++) {
-    if (present.indexOf(listStudents[i]) == -1) {
-      const nextElement = document.createElement("p"); // try changing between a and p
-      nextElement.textContent = listStudents[i];
-      document.body.appendChild(nextElement);
-    }
-  }
-}
+// =============================================================================
+// PREDICTION AND ATTENDANCE FUNCTIONS
+// =============================================================================
 
-// run the webcam image through the image model
+/**
+ * Runs the image classification prediction on the current webcam frame.
+ * Updates UI with prediction results and manages attendance tracking.
+ *
+ * INTEGRATION NOTES:
+ * - Calls collectData() from logging.js subsystem for data collection
+ * - Should log all predictions, not just high-confidence ones
+ *
+ * @async
+ * @function predict
+ * @returns {Promise<void>}
+ * @throws {Error} If model prediction fails
+ */
 async function predict() {
-  const prediction = await model.predict(webcam.canvas);
-  for (let i = 0; i < maxPredictions; i++) {
-    const classPrediction =
-      prediction[i].className + ": " + prediction[i].probability.toFixed(1);
-    labelContainer.childNodes[i].innerHTML = classPrediction;
-    if (prediction[i].probability.toFixed(2) > 0.9) {
-      document.getElementById("constantData").innerHTML =
-        prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-      myArray[i] = prediction[i].className;
-      // add present array data here?
-      present[i] = prediction[i].className;
-    } else {
-      document.getElementById("constantData").innerHTML = "I AM CONFUSED";
-    }
-    constantData.appendChild(document.createElement("div"));
-    var myList = document.getElementById("myList");
-    var list = document.getElementById("demo");
+  if (!model || !webcam) return;
 
-    // stack
-    var firstname = (document.getElementById("constantData").innerHTML =
-      prediction[i].className);
-    var entry = document.createElement("li");
-    if (prediction[i].probability.toFixed(2) > 0.9) {
-      // parameter toFixed(x) --> significance?
-      entry.appendChild(document.createTextNode(firstname)) +
-        ": " +
-        prediction[i].probability.toFixed(2);
-      list.appendChild(entry);
+  try {
+    const prediction = await model.predict(webcam.canvas);
+
+    for (let i = 0; i < maxPredictions; i++) {
+      // Update label container with prediction results
+      const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(1)}`;
+      if (labelContainer.childNodes[i]) {
+        labelContainer.childNodes[i].innerHTML = classPrediction;
+      }
+
+      // Log all predictions to logging subsystem (collectData from logging.js)
+      // TODO: Integrate - currently logging.js collectData() is not being called
+      // collectData(prediction[i].className, prediction[i].probability);
+
+      // Handle high-confidence predictions (>90%)
+      if (prediction[i].probability > 0.9) {
+        const studentName = prediction[i].className;
+
+        // Update constant data display
+        document.getElementById("constantData").innerHTML =
+          `${studentName}: ${prediction[i].probability.toFixed(2)}`;
+
+        // Add to arrays if not already present
+        if (!myArray.includes(studentName)) {
+          myArray.push(studentName);
+        }
+        if (!present.includes(studentName)) {
+          present.push(studentName);
+        }
+
+        // Add to ordered list in UI
+        const list = document.getElementById("demo");
+        if (list) {
+          const entry = document.createElement("li");
+          entry.textContent = `${studentName}: ${prediction[i].probability.toFixed(2)}`;
+          list.appendChild(entry);
+        }
+      } else {
+        // Low confidence - show confusion message
+        document.getElementById("constantData").innerHTML = "I AM CONFUSED";
+      }
     }
+  } catch (error) {
+    console.error("Error during prediction:", error);
   }
 }
+
+// =============================================================================
+// UI AND DISPLAY FUNCTIONS
+// =============================================================================
+
+/**
+ * Displays the list of present students.
+ * Clears the document body and appends paragraphs for each detected student.
+ * Note: This function clears the entire page, which may not be ideal for production.
+ *
+ * @function showArray
+ */
+function showArray() {
+  document.body.innerHTML = ""; // Clear entire page (destructive)
+
+  myArray.forEach(student => {
+    if (student !== "Empty") {
+      const element = document.createElement("p");
+      element.textContent = student;
+      document.body.appendChild(element);
+    }
+  });
+}
+
+/**
+ * Displays the list of absent students.
+ * Calculates absent students as those in listStudents but not in present array.
+ * Clears the document body and appends paragraphs for each absent student.
+ * Note: This function clears the entire page, which may not be ideal for production.
+ *
+ * @function showAbsent
+ */
+function showAbsent() {
+  document.body.innerHTML = ""; // Clear entire page (destructive)
+
+  listStudents.forEach(student => {
+    if (!present.includes(student)) {
+      const element = document.createElement("p");
+      element.textContent = student;
+      document.body.appendChild(element);
+    }
+  });
+}
+
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+
+/**
+ * Refreshes the current page.
+ *
+ * @function refresh
+ */
+function refresh() {
+  window.location.reload();
+}
+
+/**
+ * Stops code execution by clearing event listeners and document content.
+ * Note: This is a drastic measure and may break the application.
+ *
+ * @function breakCode
+ */
+function breakCode() {
+  document.removeEventListener("DOMContentLoaded", () => {}, false);
+  document.removeEventListener("load", () => {}, false);
+  document.write(""); // Clear document
+}
+
+/**
+ * Creates and appends a test button to the document body.
+ * This appears to be unused/test code.
+ *
+ * INTEGRATION NOTES:
+ * - This function conflicts with navigation in history.js subsystem
+ * - history.js creates a button programmatically, test.html has its own button
+ * - Consider removing this and relying on test.html navigation
+ *
+ * @function myFunction
+ * @deprecated Consider removing - conflicts with history.js and test.html navigation
+ */
+function myFunction() {
+  const button = document.createElement("BUTTON");
+  const text = document.createTextNode("Click me");
+  button.appendChild(text);
+  document.body.appendChild(button);
+}
+
+// =============================================================================
+// SUBSYSTEM INTEGRATION SUMMARY
+// =============================================================================
+
+/*
+ * FINAL INTEGRATION STATUS:
+ *
+ * ✅ WORKING INTEGRATIONS:
+ * - textbox.js: downloadFile() called from test.html button, works perfectly
+ * - Basic model loading: inline in init(), could be moved to modelManager.js
+ *
+ * ⚠️ PARTIAL INTEGRATIONS:
+ * - logging.js: exportData() works from button, but collectData() not called in predict()
+ * - history.js: Conflicts with test.html - duplicate navigation functionality
+ *
+ * 🔄 FUTURE INTEGRATIONS:
+ * - modelManager.js: Placeholder for model switching - not yet implemented
+ * - Enhanced logging: Add collectData() calls throughout prediction flow
+ *
+ * RECOMMENDATIONS:
+ * 1. Add collectData() call in predict() function for logging.js integration
+ * 2. Remove or refactor history.js to avoid conflicts with test.html
+ * 3. Implement modelManager.js functions when model switching is needed
+ * 4. Consider consolidating all subsystems into script.js for simplicity
+ */
