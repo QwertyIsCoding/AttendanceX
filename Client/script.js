@@ -1,11 +1,22 @@
-// firebase configuration
+/**
+ * @file script.js
+ * @description Main script for AttendanceX. Handles Firebase configuration, webcam setup, 
+ *              machine learning model integration, and user interactions.
+ */
+
+/**
+ * @constant {Object} firebaseConfig
+ * @description Firebase configuration object. Replace with your Firebase project details.
+ */
 const firebaseConfig = {
   // has been removed in the public repository for security reasons
 };
 
-// figurine model
+/**
+ * @constant {string} URL
+ * @description URL of the Teachable Machine model used for image classification.
+ */
 const URL = "https://teachablemachine.withgoogle.com/models/M28B_0nhQ/";
-
 
 let model, webcam, labelContainer, maxPredictions;
 
@@ -14,7 +25,11 @@ var listPresent = ["Null"];
 var listAbsent = [];
 var listStudents = []; // populate listStudents with the list of student names in the tensorflow model
 
-// save to firestone feature -- along with the date of the attendance with timestamp as the filename
+/**
+ * @function saveToCloud
+ * @description Saves attendance data (present/absent lists, date, timestamp) to Firebase Firestore.
+ * @returns {Promise<void>}
+ */
 async function saveToCloud() {
   // Initialize Firebase
   if (!firebase.apps.length) {
@@ -42,8 +57,12 @@ async function saveToCloud() {
     console.error('Error saving attendance data: ', error);
   }
 }
- 
-// break button -- stop code execution
+
+/**
+ * @function breakCode
+ * @description Stops code execution and clears the document content.
+ * @returns {Promise<void>}
+ */
 async function breakCode() {
   // break camera too?
   document.removeEventListener("DOMContentLoaded", function () {}, false);
@@ -51,11 +70,20 @@ async function breakCode() {
   document.write("");
 }
 
+/**
+ * @function refresh
+ * @description Reloads the current page.
+ * @returns {void}
+ */
 async function refresh() {
   window.location.reload();
 }
 
-// Load the image model and setup the webcam
+/**
+ * @function init
+ * @description Initializes the Teachable Machine model, sets up the webcam, and starts the prediction loop.
+ * @returns {Promise<void>}
+ */
 async function init() {
   const modelURL = URL + "model.json";
   const metadataURL = URL + "metadata.json";
@@ -83,7 +111,11 @@ async function init() {
   }
 }
 
-// Function to stop the webcam and unload the model
+/**
+ * @function stopModel
+ * @description Stops the webcam, unloads the model, and clears the label container.
+ * @returns {Promise<void>}
+ */
 async function stopModel() {
   // Stop the webcam
   if (webcam) {
@@ -115,7 +147,11 @@ async function stopModel() {
   maxPredictions = 0;
 }
 
-// Sign up function
+/**
+ * @function signUp
+ * @description Creates a new user account using Firebase Authentication.
+ * @returns {Promise<void>}
+ */
 async function signUp() {
   const email = document.getElementById('signup-email').value;
   const password = document.getElementById('signup-password').value;
@@ -127,7 +163,11 @@ async function signUp() {
   }
 }
 
-// Log in function
+/**
+ * @function logIn
+ * @description Signs in an existing user using Firebase Authentication.
+ * @returns {Promise<void>}
+ */
 async function logIn() {
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
@@ -139,11 +179,14 @@ async function logIn() {
   }
 }
 
-
 // Variable to store the animation frame ID
 let animationFrame;
 
-// Modified loop function to store the animation frame ID
+/**
+ * @function loop
+ * @description Continuously updates the webcam frame and runs predictions.
+ * @returns {void}
+ */
 function loop() {
   // Your existing loop code here
   // ...
@@ -152,14 +195,22 @@ function loop() {
   animationFrame = window.requestAnimationFrame(loop);
 }
 
-// looping -- keep track
+/**
+ * @function loop
+ * @description Continuously updates the webcam frame and runs predictions.
+ * @returns {void}
+ */
 async function loop() {
   webcam.update(); // update the webcam frame
   await predict();
   window.requestAnimationFrame(loop);
 }
 
-// show present
+/**
+ * @function showArray
+ * @description Displays the list of present students on the page.
+ * @returns {void}
+ */
 var myArray = [];
 var present = [];
 var indexes = [];
@@ -178,6 +229,11 @@ function showArray() {
   }
 }
 
+/**
+ * @function showAbsent
+ * @description Displays the list of absent students on the page.
+ * @returns {void}
+ */
 function showAbsent() {
   document.body.innerHTML = "";
   for (let i = 0; i < listStudents.length; i++) {
@@ -189,7 +245,11 @@ function showAbsent() {
   }
 }
 
-// run the webcam image through the image model
+/**
+ * @function predict
+ * @description Runs the webcam image through the Teachable Machine model and updates predictions.
+ * @returns {Promise<void>}
+ */
 async function predict() {
   const prediction = await model.predict(webcam.canvas);
   for (let i = 0; i < maxPredictions; i++) {

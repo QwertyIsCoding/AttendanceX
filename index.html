@@ -1,3 +1,9 @@
+<!--
+  @file index.html
+  @description Main HTML file for AttendanceX. Provides the user interface for the application.
+  Includes sections for project description, features, and getting started.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,6 +46,64 @@
         <div class="buttons">
           <a href="https://github.com/qwertyiscoding/attendanceX" class="button primary">View Source</a>
         </div>
+        <br>
+        <h2>Docs</h2>
+        <div class="buttons">
+          <button id="open-readme" class="button primary" type="button">Open README</button>
+        </div>
+
+        <!-- README render area -->
+        <div id="doc-content" class="markdown-body" style="margin-top:1rem; display:none;"></div>
+
+        <!-- Markdown renderer + sanitizer + GitHub-markdown CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+
+        <script>
+          (function () {
+            const btn = document.getElementById('open-readme');
+            const container = document.getElementById('doc-content');
+
+            async function fetchReadme() {
+              // Try common filename variants
+              const names = ['README.md', 'Readme.md', 'readme.md'];
+              let text = null;
+              for (const name of names) {
+          try {
+            const res = await fetch(name);
+            if (!res.ok) continue;
+            text = await res.text();
+            break;
+          } catch (e) {
+            // continue to next variant
+          }
+              }
+              return text;
+            }
+
+            async function showReadme() {
+              btn.disabled = true;
+              btn.textContent = 'Loading...';
+              const md = await fetchReadme();
+              if (!md) {
+          btn.disabled = false;
+          btn.textContent = 'Open README';
+          container.style.display = 'block';
+          container.innerHTML = '<p><em>Unable to load README.md. Ensure the file is available and served by your web server.</em></p>';
+          return;
+              }
+              // Convert markdown -> HTML, sanitize, and insert
+              const html = marked.parse(md);
+              container.innerHTML = DOMPurify.sanitize(html);
+              container.style.display = 'block';
+              btn.textContent = 'Refresh README';
+              btn.disabled = false;
+            }
+
+            btn.addEventListener('click', showReadme);
+          })();
+        </script>
       </section>
     </main>
 

@@ -1,65 +1,90 @@
-<div>Attendance Machine (a proof of concept) - Pranav Somalinga</div>
-<br />
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-<script src="script.js"></script>
-<script src="textbox.js"></script>
-<script src="logging.js"></script>
+<!--
+  @file test.html
+  @description Test interface for AttendanceX. Provides buttons and forms for interacting with the system,
+               including user authentication, webcam initialization, and attendance tracking.
+-->
 
-<!-- Sign Up Form -->
-<div>
-  <h2>Sign Up</h2>
-  <input type="email" id="signup-email" placeholder="Email" />
-  <input type="password" id="signup-password" placeholder="Password" />
-  <button type="button" onclick="signUp()">Sign Up</button>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Machine - Proof of Concept</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+  <script src="script.js"></script>
+  <script src="textbox.js"></script>
+  <script src="logging.js"></script>
+</head>
+<body>
+  <!-- Title -->
+  <div>Attendance Machine (a proof of concept) - Pranav Somalinga</div>
+  <br />
 
-<!-- Log In Form -->
-<div>
-  <h2>Log In</h2>
-  <input type="email" id="login-email" placeholder="Email" />
-  <input type="password" id="login-password" placeholder="Password" />
-  <button type="button" onclick="logIn()">Log In</button>
-</div>
+  <!-- Sign Up Form -->
+  <div>
+    <h2>Sign Up</h2>
+    <input type="email" id="signup-email" placeholder="Email" />
+    <input type="password" id="signup-password" placeholder="Password" />
+    <button type="button" onclick="signUp()">Sign Up</button>
+  </div>
 
-<br>
-<br>
+  <!-- Log In Form -->
+  <div>
+    <h2>Log In</h2>
+    <input type="email" id="login-email" placeholder="Email" />
+    <input type="password" id="login-password" placeholder="Password" />
+    <button type="button" onclick="logIn()">Log In</button>
+  </div>
 
-<button type="button" onclick="init()">Start</button>
-<button type="button" onclick="stopModel()">Stop</button>
-<button type="button" onclick="breakCode()">Break</button>
-<button type="button" onclick="refresh()">Refresh</button>
-<button type="button" onclick="saveToCloud()">SaveToFirebase</button>
-<!-- HTML Button -->
-<button id="showArrayBtn" onclick="showArray()">Show Present</button>
-<button id="showMissingBtn" onclick="showAbsent()">Show Absent</button>
-<button id="exportButton">Export</button>
-<button onclick="history.back()">Go Back</button>
-<br />
-<div id="webcam-container"></div>
-<div id="label-container"></div>
+  <br><br>
 
-<!--attemping to make the data easier to read-->
-<br />
-<textarea id="textArea"> </textarea>
+  <!-- Control Buttons -->
+  <button type="button" onclick="init()">Start</button>
+  <button type="button" onclick="stopModel()">Stop</button>
+  <button type="button" onclick="breakCode()">Break</button>
+  <button type="button" onclick="refresh()">Refresh</button>
+  <button type="button" onclick="saveToCloud()">SaveToFirebase</button>
+  <button id="showArrayBtn" onclick="showArray()">Show Present</button>
+  <button id="showMissingBtn" onclick="showAbsent()">Show Absent</button>
+  <button id="exportButton">Export</button>
+  <button onclick="history.back()">Go Back</button>
+  <br />
 
-<script>
-  function myFunction() {
-    var x = document.createElement("BUTTON");
-    var t = document.createTextNode("Click me");
-    x.appendChild(t);
-    document.body.appendChild(x);
-  }
-</script>
+  <!-- Webcam and Label Containers -->
+  <div id="webcam-container"></div>
+  <div id="label-container"></div>
 
-<br />
-<button onclick="downloadFile()">save File</button>
-<script></script>
-<br /><br />
-<div id="constantData">What am I looking at:</div>
+  <!-- Text Area for Data -->
+  <br />
+  <textarea id="textArea"></textarea>
 
-<div id="presentStudents">
-  <!--this does not seem to be working-->
-  Students I found:
-</div>
-<ol id="demo"></ol>
+  <!-- Save File Button -->
+  <br />
+  <button onclick="downloadFile()">save File</button>
+  <br /><br />
+
+  <!-- Constant Data Display -->
+  <div id="constantData">What am I looking at:</div>
+
+  <!-- Present Students Display -->
+  <div id="presentStudents">
+    Students I found:
+  </div>
+  <ol id="demo"></ol>
+
+  <!-- Example Button Creation Script -->
+  <script>
+    /**
+     * @function myFunction
+     * @description Creates a button dynamically and appends it to the document body.
+     */
+    function myFunction() {
+      var x = document.createElement("BUTTON");
+      var t = document.createTextNode("Click me");
+      x.appendChild(t);
+      document.body.appendChild(x);
+    }
+  </script>
+</body>
+</html>

@@ -180,7 +180,6 @@ Contributions are welcome! Please fork the repository and submit pull requests. 
 
 This project is licensed under the terms specified in the LICENSE file.
 
-
 ## Documentation
 
-Documentation accelerated with LLM tools to maintain thoroughness and consistentcy. 
+This project is thoroughly documented to help users and developers understand its functionality. Each file in the project contains inline comments and JSDoc-style annotations to explain its purpose, functions, and usage. Refer to the source code for detailed insights into the implementation.

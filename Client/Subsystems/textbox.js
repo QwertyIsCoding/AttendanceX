@@ -1,3 +1,13 @@
+/**
+ * @file textbox.js
+ * @description Handles the functionality for downloading text entered in a textarea as a file.
+ */
+
+/**
+ * @function downloadFile
+ * @description Creates a text file from the content of a textarea and triggers a download.
+ * @returns {void}
+ */
 function downloadFile() {
     var textToWrite = document.getElementById("textArea").innerHTML;
     var textFileAsBlob = new Blob([textToWrite], { type: "text/plain" });
